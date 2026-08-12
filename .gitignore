@@ -1,0 +1,16 @@
+node_modules/
+.env
+backend/tmp/
+backend/.runtime/
+backend/coverage/
+*.log
+.DS_Store
+
+# 已停止使用的微信小程序和旧部署包保留在本机，不进入新网站仓库
+miniprogram/
+scripts/
+frameflow-backend-cloud*.zip
+project.config.json
+project.private.config.json
+start-backend.cmd
+nobody-knows-gif-better-github.zip
