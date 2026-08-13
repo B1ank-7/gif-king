@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#f4f4f1">
+    <meta name="description" content="上传一段视频，轻松转换并保存为 GIF。">
+    <meta property="og:title" content="没人比我更懂GIF">
+    <meta property="og:description" content="把一段视频，变成一张会动的图。">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://b1ank-7.github.io/nobody-knows-gif-better/og-cover.png">
+    <title>没人比我更懂GIF</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="site-header" aria-label="网站页眉">
+        <a class="wordmark" href="./" aria-label="没人比我更懂GIF 首页">
+          <span class="wordmark-mark" aria-hidden="true">GIF</span>
+          <span>没人比我更懂GIF</span>
+        </a>
+        <span class="header-note">视频只用于本次转换</span>
+      </header>
+
+      <main class="hero">
+        <section class="hero-copy" aria-labelledby="hero-title">
+          <p class="eyebrow"><span aria-hidden="true"></span> VIDEO TO GIF</p>
+          <h1 id="hero-title">把视频，<br><em>变成 GIF。</em></h1>
+          <p class="hero-lead">选择视频，剩下的交给我。</p>
+        </section>
+
+        <section class="converter" aria-label="视频转 GIF">
+          <div class="converter-topline" aria-hidden="true">
+            <span>DROP A MOMENT</span>
+            <span class="topline-dot"></span>
+          </div>
+
+          <div class="state-panel is-active" data-panel="idle">
+            <button class="drop-zone" id="drop-zone" type="button">
+              <span class="upload-symbol" aria-hidden="true">↗</span>
+              <span class="drop-title">选择视频</span>
+              <span class="drop-hint">或把视频拖到这里</span>
+            </button>
+          </div>
+
+          <div class="state-panel" data-panel="selected" hidden>
+            <div class="preview-frame video-frame">
+              <video id="video-preview" muted playsinline></video>
+              <span class="preview-badge">视频已选好</span>
+            </div>
+            <div class="action-stack">
+              <button class="primary-button" id="convert-button" type="button">转为 GIF</button>
+              <button class="text-button" id="change-button" type="button">换一个视频</button>
+            </div>
+          </div>
+
+          <div class="state-panel" data-panel="processing" hidden aria-live="polite">
+            <div class="processing-visual" aria-hidden="true">
+              <span class="processing-orbit"></span>
+              <span class="processing-core">GIF</span>
+            </div>
+            <div class="processing-copy">
+              <p class="state-kicker">正在转换</p>
+              <h2 id="processing-message">正在理解视频里的每一个动作</h2>
+              <div class="progress-line"><span></span></div>
+              <p>可以先喝口水，不用盯着页面。</p>
+            </div>
+          </div>
+
+          <div class="state-panel" data-panel="done" hidden aria-live="polite">
+            <div class="preview-frame gif-frame">
+              <img id="gif-preview" alt="已经转换好的 GIF 预览">
+              <span class="preview-badge done-badge">已经做好了</span>
+            </div>
+            <div class="action-stack">
+              <a class="primary-button save-button" id="save-button" href="#" download>保存 GIF</a>
+              <button class="text-button" id="again-button" type="button">再做一个</button>
+            </div>
+          </div>
+
+          <div class="state-panel" data-panel="error" hidden aria-live="assertive">
+            <div class="error-mark" aria-hidden="true">!</div>
+            <div class="error-copy">
+              <p class="state-kicker">这次没有成功</p>
+              <h2 id="error-message">暂时无法处理这段视频</h2>
+            </div>
+            <button class="primary-button" id="retry-button" type="button">重新选择</button>
+          </div>
+
+          <input id="video-input" type="file" accept="video/*" hidden>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <span>没人比我更懂GIF</span>
+        <span>Made for moments in motion.</span>
+      </footer>
+    </div>
+
+    <noscript>请开启浏览器的 JavaScript 后再使用视频转换。</noscript>
+    <script src="./config.js"></script>
+    <script src="./app.js" defer></script>
+  </body>
+</html>
