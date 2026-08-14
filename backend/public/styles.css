@@ -438,11 +438,11 @@ h1 em {
 }
 
 .progress-line span {
-  width: 42%;
+  width: 0;
   height: 100%;
   display: block;
   background: var(--accent);
-  animation: progress-sweep 1.9s ease-in-out infinite;
+  transition: width 280ms ease;
 }
 
 [data-panel="error"] {
@@ -512,11 +512,6 @@ a:focus-visible {
 
 @keyframes orbit {
   to { transform: rotate(360deg); }
-}
-
-@keyframes progress-sweep {
-  0% { transform: translateX(-110%); }
-  55%, 100% { transform: translateX(245%); }
 }
 
 @media (max-width: 980px) {

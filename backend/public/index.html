@@ -8,7 +8,7 @@
     <meta property="og:title" content="没人比我更懂GIF">
     <meta property="og:description" content="把一段视频，变成一张会动的图。">
     <meta property="og:type" content="website">
-    <meta property="og:image" content="https://b1ank-7.github.io/nobody-knows-gif-better/og-cover.png">
+    <meta property="og:image" content="https://b1ank-7.github.io/gif-king/og-cover.png">
     <title>没人比我更懂GIF</title>
     <link rel="stylesheet" href="./styles.css">
   </head>
@@ -19,7 +19,7 @@
           <span class="wordmark-mark" aria-hidden="true">GIF</span>
           <span>没人比我更懂GIF</span>
         </a>
-        <span class="header-note">视频只用于本次转换</span>
+        <span class="header-note">视频只在你的设备里处理</span>
       </header>
 
       <main class="hero">
@@ -62,8 +62,10 @@
             <div class="processing-copy">
               <p class="state-kicker">正在转换</p>
               <h2 id="processing-message">正在理解视频里的每一个动作</h2>
-              <div class="progress-line"><span></span></div>
-              <p>可以先喝口水，不用盯着页面。</p>
+              <div class="progress-line" role="progressbar" aria-label="转换进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <span id="progress-bar"></span>
+              </div>
+              <p>页面保持打开即可，视频不会上传。</p>
             </div>
           </div>
 
@@ -98,7 +100,6 @@
     </div>
 
     <noscript>请开启浏览器的 JavaScript 后再使用视频转换。</noscript>
-    <script src="./config.js"></script>
-    <script src="./app.js" defer></script>
+    <script type="module" src="./app.js"></script>
   </body>
 </html>

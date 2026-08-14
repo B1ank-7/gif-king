@@ -4,10 +4,12 @@
   "private": true,
   "description": "Responsive video-to-GIF website with duration-preserving motion interpolation",
   "main": "src/server.js",
-  "packageManager": "npm@10.8.2",
+  "packageManager": "pnpm@11.19.0",
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
+    "build:web": "vite build public --outDir ../dist --emptyOutDir && node scripts/copy-ffmpeg-assets.mjs",
+    "preview:web": "vite preview public --outDir ../dist",
     "test": "node --test"
   },
   "engines": {
@@ -16,5 +18,11 @@
   "dependencies": {
     "express": "^4.21.2",
     "multer": "^2.0.2"
+  },
+  "devDependencies": {
+    "@ffmpeg/core": "0.12.10",
+    "@ffmpeg/ffmpeg": "0.12.15",
+    "@ffmpeg/util": "0.12.2",
+    "vite": "8.2.1"
   }
 }
