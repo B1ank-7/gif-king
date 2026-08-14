@@ -42,7 +42,7 @@ jobs:
 
       - name: Build browser-only website
         working-directory: backend
-        run: pnpm run build:web
+        run: pnpm exec vite build public --outDir ../dist --emptyOutDir --base=/gif-king/ && node scripts/copy-ffmpeg-assets.mjs
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
