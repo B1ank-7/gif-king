@@ -97,8 +97,8 @@ export function distributeFrameDelays(frameCount, durationSeconds) {
   return delays
 }
 
-export function calculateTargetFrameCount(durationSeconds, frameRate = 100) {
-  return Math.max(1, Math.floor(Math.max(0.01, Number(durationSeconds)) * frameRate + 1e-9))
+export function calculateTargetFrameCount(durationSeconds, frameRate = 60) {
+  return Math.max(1, Math.round(Math.max(0.01, Number(durationSeconds)) * frameRate))
 }
 
 export function buildProfiles(durationSeconds, sourceWidth) {

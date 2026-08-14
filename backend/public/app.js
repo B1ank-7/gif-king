@@ -7,8 +7,7 @@ import {
   isWithinOutputLimit
 } from './gif-timing.mjs'
 
-const TARGET_FRAME_RATE = 100
-const MOTION_FRAME_RATE = 50
+const TARGET_FRAME_RATE = 60
 const MOBILE_MAX_PROCESSING_WIDTH = 320
 const MAX_DURATION_SECONDS = 30
 const MAX_INPUT_BYTES = 200 * 1024 * 1024
@@ -222,10 +221,8 @@ async function convertWithProfiles(engine, inputName, metadata, version) {
 function buildFfmpegArgs(inputName, outputName, profile, targetFrameCount) {
   const filter = [
     `[0:v]scale='min(iw,${profile.width})':-2:flags=lanczos,format=yuv420p,` +
-      `minterpolate=fps=${MOTION_FRAME_RATE}:mi_mode=mci:mc_mode=obmc:` +
+      `minterpolate=fps=${TARGET_FRAME_RATE}:mi_mode=mci:mc_mode=obmc:` +
       'me_mode=bilat:me=epzs:search_param=8:vsbmc=1,' +
-      'tpad=stop_mode=clone:stop_duration=0.1,' +
-      `minterpolate=fps=${TARGET_FRAME_RATE}:mi_mode=blend,` +
       'tpad=stop_mode=clone:stop_duration=0.1,' +
       `trim=end_frame=${targetFrameCount},setpts=PTS-STARTPTS,split[v0][v1]`,
     `[v0]palettegen=max_colors=${profile.colors}:stats_mode=diff[p]`,
