@@ -6,8 +6,9 @@ import {
   calculateTargetFrameCount,
   isWithinOutputLimit
 } from './gif-timing.mjs'
+import { requestMobileGifSave } from './save-gif.mjs'
 
-const TARGET_FRAME_RATE = 60
+const TARGET_FRAME_RATE = 50
 const MOBILE_MAX_PROCESSING_WIDTH = 320
 const MAX_DURATION_SECONDS = 30
 const MAX_INPUT_BYTES = 200 * 1024 * 1024
@@ -22,6 +23,8 @@ const progressLine = document.querySelector('.progress-line')
 const progressBar = document.querySelector('#progress-bar')
 const errorMessage = document.querySelector('#error-message')
 const saveButton = document.querySelector('#save-button')
+const mobileSaveTip = document.querySelector('#mobile-save-tip')
+const gifFrame = document.querySelector('.gif-frame')
 
 let selectedFile = null
 let previewUrl = ''
@@ -84,6 +87,7 @@ function releaseResult() {
   resultFilename = ''
   gifPreview.removeAttribute('src')
   saveButton.href = '#'
+  resetSaveFeedback()
 }
 
 function showError(message) {
@@ -288,31 +292,53 @@ async function saveResult(event) {
   if (!resultBlob || !resultUrl || !isMobileDevice()) return
 
   event.preventDefault()
-  const file = typeof File === 'function'
-    ? new File([resultBlob], resultFilename || 'video.gif', { type: 'image/gif' })
-    : null
+  showSaveFeedback('正在打开系统保存菜单…')
 
-  if (file && typeof navigator.share === 'function' && typeof navigator.canShare === 'function') {
-    try {
-      if (navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: resultFilename || 'GIF'
-        })
-        return
-      }
-    } catch (error) {
-      if (error?.name === 'AbortError') return
-      console.warn('Unable to open the native share sheet', error)
-    }
-  }
+  const outcome = await requestMobileGifSave({
+    blob: resultBlob,
+    filename: resultFilename || 'video.gif',
+    userAgent: navigator.userAgent,
+    FileClass: typeof File === 'function' ? File : null,
+    canShare: typeof navigator.canShare === 'function'
+      ? navigator.canShare.bind(navigator)
+      : null,
+    share: typeof navigator.share === 'function'
+      ? navigator.share.bind(navigator)
+      : null
+  })
 
-  const opened = window.open(resultUrl, '_blank')
-  if (opened) {
-    opened.opener = null
+  if (outcome.status === 'shared') {
+    showSaveFeedback('系统菜单已打开，请选择“存储图像”或“保存到文件”')
     return
   }
-  window.location.assign(resultUrl)
+  if (outcome.status === 'cancelled') {
+    showSaveFeedback('保存已取消，可以再次点击“保存 GIF”')
+    return
+  }
+
+  showSaveGuide()
+}
+
+function showSaveFeedback(message) {
+  mobileSaveTip.textContent = message
+  mobileSaveTip.hidden = false
+  gifFrame.classList.remove('is-save-guide')
+  saveButton.textContent = '保存 GIF'
+}
+
+function showSaveGuide() {
+  mobileSaveTip.textContent = '请长按上方 GIF，选择“保存图片”；如果没有该选项，请用系统浏览器打开本页'
+  mobileSaveTip.hidden = false
+  gifFrame.classList.add('is-save-guide')
+  saveButton.textContent = '请长按上方 GIF 保存'
+  requestAnimationFrame(() => gifPreview.scrollIntoView({ behavior: 'smooth', block: 'center' }))
+}
+
+function resetSaveFeedback() {
+  mobileSaveTip.textContent = ''
+  mobileSaveTip.hidden = true
+  gifFrame.classList.remove('is-save-guide')
+  saveButton.textContent = '保存 GIF'
 }
 
 function isMobileDevice() {

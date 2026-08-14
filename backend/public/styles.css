@@ -287,6 +287,16 @@ h1 em {
   background-size: 20px 20px;
 }
 
+.gif-frame img {
+  -webkit-touch-callout: default;
+  user-select: auto;
+}
+
+.gif-frame.is-save-guide {
+  outline: 2px solid rgba(127, 139, 130, 0.62);
+  outline-offset: 5px;
+}
+
 .preview-badge {
   position: absolute;
   top: 16px;
@@ -314,6 +324,18 @@ h1 em {
   margin-top: 24px;
   display: grid;
   gap: 12px;
+}
+
+.mobile-save-tip {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.mobile-save-tip[hidden] {
+  display: none;
 }
 
 .primary-button {

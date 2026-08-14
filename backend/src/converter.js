@@ -119,8 +119,8 @@ async function encodeGif(inputPath, outputPath, profile, duration, config) {
   const targetFrameCount = calculateTargetFrameCount(duration)
   const filter = [
     `[0:v]scale='min(iw,${profile.width})':-2:flags=lanczos,format=yuv420p,` +
-      'tpad=stop_mode=clone:stop_duration=0.1,' +
       `minterpolate=fps=${GIF_FRAME_RATE}:mi_mode=mci:mc_mode=obmc:me_mode=bilat:me=epzs:vsbmc=1,` +
+      'tpad=stop_mode=clone:stop_duration=0.1,' +
       `trim=end_frame=${targetFrameCount},setpts=PTS-STARTPTS,split[v0][v1]`,
     `[v0]palettegen=max_colors=${profile.colors}:stats_mode=diff[p]`,
     '[v1][p]paletteuse=dither=sierra2_4a:diff_mode=rectangle'

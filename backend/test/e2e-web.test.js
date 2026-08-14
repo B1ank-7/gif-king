@@ -5,6 +5,7 @@ const { spawn } = require('node:child_process')
 const fs = require('node:fs/promises')
 const os = require('node:os')
 const path = require('node:path')
+const { applyGifTiming } = require('../src/gif-delay')
 
 const ffmpegPath = process.env.E2E_FFMPEG_PATH || 'ffmpeg'
 const shouldRun = process.env.RUN_E2E === '1'
@@ -65,6 +66,11 @@ test('browser flow uploads, converts and downloads a duration-preserving GIF', {
   await fs.writeFile(resultPath, result)
   assert.match(result.toString('ascii', 0, 6), /^GIF8[79]a$/)
   assert.ok(result.length <= 10 * 1024 * 1024)
+  const timing = applyGifTiming(Buffer.from(result), 1)
+  assert.equal(timing.frameCount, 50)
+  assert.ok(timing.delays.every((delay) => delay === 2))
+  assert.equal(timing.delays.reduce((sum, delay) => sum + delay, 0), 100)
+  assert.equal(timing.duration, 1)
 
   const probe = await run(ffmpegPath, ['-hide_banner', '-i', resultPath, '-f', 'null', '-'], true)
   const duration = probe.stderr.match(/Duration:\s*00:00:(\d+(?:\.\d+)?)/)

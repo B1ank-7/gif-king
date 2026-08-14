@@ -32,10 +32,12 @@ test('writes player-compatible delays while preserving duration', () => {
   assert.equal(result.duration, 0.09)
 })
 
-test('50fps timing stays within GIF precision for a fractional duration', () => {
+test('50fps timing stays player-compatible while preserving duration', () => {
   const delays = distributeFrameDelays(26, 0.53)
   assert.equal(delays.length, 26)
   assert.ok(delays.every((delay) => delay >= 2))
+  assert.equal(delays.filter((delay) => delay === 2).length, 25)
+  assert.equal(delays.filter((delay) => delay === 3).length, 1)
   assert.equal(delays.reduce((total, delay) => total + delay, 0), 53)
 })
 

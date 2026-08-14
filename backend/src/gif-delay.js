@@ -1,7 +1,7 @@
 /**
- * GIF stores frame delays in centiseconds. Use a 20ms baseline because many
- * players clamp 10ms frames and make a nominal 100fps GIF look like slow motion.
- * The distributed remainder preserves the source duration to GIF's 10ms precision.
+ * GIF stores frame delays in centiseconds. A 20ms baseline gives a stable 50fps
+ * cadence in players that clamp shorter delays. The distributed remainder keeps
+ * the source duration accurate to GIF's 10ms precision.
  */
 function applyGifTiming(buffer, durationSeconds) {
   const delayOffsets = []
@@ -76,7 +76,7 @@ function distributeFrameDelays(frameCount, durationSeconds) {
   if (!Number.isInteger(frameCount) || frameCount <= 0) return []
 
   const requestedTicks = Math.round(Number(durationSeconds) * 100)
-  const totalTicks = Math.max(frameCount, Number.isFinite(requestedTicks) ? requestedTicks : frameCount * 2)
+  const totalTicks = Math.max(frameCount, Number.isFinite(requestedTicks) ? requestedTicks : frameCount)
   const baseDelay = Math.floor(totalTicks / frameCount)
   const remainder = totalTicks - baseDelay * frameCount
   const delays = []
