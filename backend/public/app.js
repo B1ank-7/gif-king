@@ -7,7 +7,9 @@ import {
   isWithinOutputLimit
 } from './gif-timing.mjs'
 
-const TARGET_FRAME_RATE = 50
+const TARGET_FRAME_RATE = 100
+const MOTION_FRAME_RATE = 50
+const MOBILE_MAX_PROCESSING_WIDTH = 320
 const MAX_DURATION_SECONDS = 30
 const MAX_INPUT_BYTES = 200 * 1024 * 1024
 
@@ -25,6 +27,8 @@ const saveButton = document.querySelector('#save-button')
 let selectedFile = null
 let previewUrl = ''
 let resultUrl = ''
+let resultBlob = null
+let resultFilename = ''
 let ffmpeg = null
 let ffmpegLoaded = false
 let runVersion = 0
@@ -77,6 +81,8 @@ function releaseVideoPreview() {
 function releaseResult() {
   if (resultUrl) URL.revokeObjectURL(resultUrl)
   resultUrl = ''
+  resultBlob = null
+  resultFilename = ''
   gifPreview.removeAttribute('src')
   saveButton.href = '#'
 }
@@ -171,7 +177,10 @@ async function loadFfmpeg() {
 }
 
 async function convertWithProfiles(engine, inputName, metadata, version) {
-  const profiles = buildProfiles(metadata.duration, metadata.width)
+  const processingWidth = isMobileDevice()
+    ? Math.min(metadata.width, MOBILE_MAX_PROCESSING_WIDTH)
+    : metadata.width
+  const profiles = buildProfiles(metadata.duration, processingWidth)
   const targetFrameCount = calculateTargetFrameCount(metadata.duration, TARGET_FRAME_RATE)
   let lastSize = 0
 
@@ -213,9 +222,11 @@ async function convertWithProfiles(engine, inputName, metadata, version) {
 function buildFfmpegArgs(inputName, outputName, profile, targetFrameCount) {
   const filter = [
     `[0:v]scale='min(iw,${profile.width})':-2:flags=lanczos,format=yuv420p,` +
-      'tpad=stop_mode=clone:stop_duration=0.1,' +
-      `minterpolate=fps=${TARGET_FRAME_RATE}:mi_mode=mci:mc_mode=obmc:` +
+      `minterpolate=fps=${MOTION_FRAME_RATE}:mi_mode=mci:mc_mode=obmc:` +
       'me_mode=bilat:me=epzs:search_param=8:vsbmc=1,' +
+      'tpad=stop_mode=clone:stop_duration=0.1,' +
+      `minterpolate=fps=${TARGET_FRAME_RATE}:mi_mode=blend,` +
+      'tpad=stop_mode=clone:stop_duration=0.1,' +
       `trim=end_frame=${targetFrameCount},setpts=PTS-STARTPTS,split[v0][v1]`,
     `[v0]palettegen=max_colors=${profile.colors}:stats_mode=diff[p]`,
     '[v1][p]paletteuse=dither=sierra2_4a:diff_mode=rectangle'
@@ -265,13 +276,51 @@ function readVideoMetadata(video) {
 function showResult(buffer, sourceName) {
   releaseResult()
   const blob = new Blob([buffer], { type: 'image/gif' })
+  resultBlob = blob
+  resultFilename = `${baseName(sourceName)}.gif`
   resultUrl = URL.createObjectURL(blob)
   gifPreview.src = resultUrl
   saveButton.href = resultUrl
-  saveButton.download = `${baseName(sourceName)}.gif`
+  saveButton.download = resultFilename
   showPanel('done')
   releaseVideoPreview()
   selectedFile = null
+}
+
+async function saveResult(event) {
+  if (!resultBlob || !resultUrl || !isMobileDevice()) return
+
+  event.preventDefault()
+  const file = typeof File === 'function'
+    ? new File([resultBlob], resultFilename || 'video.gif', { type: 'image/gif' })
+    : null
+
+  if (file && typeof navigator.share === 'function' && typeof navigator.canShare === 'function') {
+    try {
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: resultFilename || 'GIF'
+        })
+        return
+      }
+    } catch (error) {
+      if (error?.name === 'AbortError') return
+      console.warn('Unable to open the native share sheet', error)
+    }
+  }
+
+  const opened = window.open(resultUrl, '_blank')
+  if (opened) {
+    opened.opener = null
+    return
+  }
+  window.location.assign(resultUrl)
+}
+
+function isMobileDevice() {
+  return window.matchMedia?.('(pointer: coarse)').matches === true ||
+    /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
 }
 
 function updateProgress(nextValue, message) {
@@ -332,6 +381,7 @@ document.querySelector('#retry-button').addEventListener('click', () => {
   resetConverter()
   openFilePicker()
 })
+saveButton.addEventListener('click', saveResult)
 
 for (const eventName of ['dragenter', 'dragover']) {
   dropZone.addEventListener(eventName, (event) => {

@@ -74,7 +74,7 @@ export function distributeFrameDelays(frameCount, durationSeconds) {
   if (!Number.isInteger(frameCount) || frameCount <= 0) return []
 
   const requestedTicks = Math.round(Number(durationSeconds) * 100)
-  const fallbackTicks = frameCount * 2
+  const fallbackTicks = frameCount
   const totalTicks = Math.max(
     frameCount,
     Number.isFinite(requestedTicks) ? requestedTicks : fallbackTicks
@@ -97,7 +97,7 @@ export function distributeFrameDelays(frameCount, durationSeconds) {
   return delays
 }
 
-export function calculateTargetFrameCount(durationSeconds, frameRate = 50) {
+export function calculateTargetFrameCount(durationSeconds, frameRate = 100) {
   return Math.max(1, Math.floor(Math.max(0.01, Number(durationSeconds)) * frameRate + 1e-9))
 }
 
