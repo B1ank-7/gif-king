@@ -1,4 +1,4 @@
-const MAX_OUTPUT_BYTES = 10 * 1024 * 1024
+const MAX_OUTPUT_BYTES = 8 * 1024 * 1024
 
 export function applyGifTiming(input, durationSeconds) {
   const buffer = input instanceof Uint8Array ? new Uint8Array(input) : new Uint8Array(input)

@@ -65,7 +65,17 @@ test('browser flow uploads, converts and downloads a duration-preserving GIF', {
   const result = Buffer.from(await resultResponse.arrayBuffer())
   await fs.writeFile(resultPath, result)
   assert.match(result.toString('ascii', 0, 6), /^GIF8[79]a$/)
-  assert.ok(result.length <= 10 * 1024 * 1024)
+  assert.ok(result.length <= 8 * 1024 * 1024)
+
+  const { blobToGifDataUrl } = await import('../public/save-gif.mjs')
+  const previewDataUrl = await blobToGifDataUrl(
+    new Blob([result], { type: 'image/gif' }),
+    NodeFileReader
+  )
+  const restoredPreview = Buffer.from(previewDataUrl.split(',')[1], 'base64')
+  assert.deepEqual(restoredPreview, result)
+  assert.ok(previewDataUrl.length < 25 * 1024 * 1024)
+
   const timing = applyGifTiming(Buffer.from(result), 1)
   assert.equal(timing.frameCount, 50)
   assert.ok(timing.delays.every((delay) => delay === 2))
@@ -83,6 +93,29 @@ test('browser flow uploads, converts and downloads a duration-preserving GIF', {
 
 function wait(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds))
+}
+
+class NodeFileReader {
+  constructor() {
+    this.listeners = new Map()
+    this.result = null
+    this.error = null
+  }
+
+  addEventListener(name, callback) {
+    this.listeners.set(name, callback)
+  }
+
+  async readAsDataURL(blob) {
+    try {
+      const bytes = Buffer.from(await blob.arrayBuffer())
+      this.result = `data:${blob.type};base64,${bytes.toString('base64')}`
+      this.listeners.get('load')?.()
+    } catch (error) {
+      this.error = error
+      this.listeners.get('error')?.()
+    }
+  }
 }
 
 function run(command, args, allowNonZero = false) {

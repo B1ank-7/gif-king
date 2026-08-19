@@ -50,8 +50,8 @@ test('browser profiles preserve 50fps intent and enforce the output limit', () =
   assert.equal(delays.reduce((sum, delay) => sum + delay, 0), 53)
   assert.ok(delays.every((delay) => delay >= 2))
   assert.ok(buildProfiles(5, 1920).length > 1)
-  assert.equal(isWithinOutputLimit(10 * 1024 * 1024), true)
-  assert.equal(isWithinOutputLimit(10 * 1024 * 1024 + 1), false)
+  assert.equal(isWithinOutputLimit(8 * 1024 * 1024), true)
+  assert.equal(isWithinOutputLimit(8 * 1024 * 1024 + 1), false)
 })
 
 test('published browser code has no cloud conversion endpoint', async () => {
@@ -62,6 +62,10 @@ test('published browser code has no cloud conversion endpoint', async () => {
   assert.match(source, /mi_mode=mci/)
   assert.doesNotMatch(source, /mi_mode=blend/)
   assert.match(source, /requestMobileGifSave/)
+  assert.match(source, /blobToGifDataUrl/)
+  assert.match(source, /gifPreview\.src = await blobToGifDataUrl\(blob\)/)
+  assert.match(source, /saveButton\.href = gifPreview\.src/)
+  assert.doesNotMatch(source, /saveButton\.href = resultUrl/)
   assert.match(source, /showSaveGuide/)
   assert.doesNotMatch(source, /window\.open\(resultUrl/)
   assert.doesNotMatch(source, /window\.location\.assign\(resultUrl\)/)

@@ -6,7 +6,7 @@ import {
   calculateTargetFrameCount,
   isWithinOutputLimit
 } from './gif-timing.mjs'
-import { requestMobileGifSave } from './save-gif.mjs'
+import { blobToGifDataUrl, requestMobileGifSave } from './save-gif.mjs'
 
 const TARGET_FRAME_RATE = 50
 const MOBILE_MAX_PROCESSING_WIDTH = 320
@@ -100,7 +100,7 @@ function friendlyError(message = '') {
   if (/memory|内存|out of bounds|Array buffer/i.test(normalized)) {
     return '设备内存不够，换一段更短的视频试试'
   }
-  if (/超过|太大|太长|30 秒|10MB/i.test(normalized)) {
+  if (/超过|太大|太长|30 秒|10MB|保存安全范围/i.test(normalized)) {
     return '这段视频有点长，换一段短一点的试试'
   }
   if (/格式|有效|画面|demux|decode|Invalid data/i.test(normalized)) {
@@ -141,7 +141,7 @@ async function startConversion() {
 
     const result = await convertWithProfiles(engine, inputName, metadata, version)
     if (version !== runVersion) return
-    showResult(result.buffer, selectedFile.name)
+    await showResult(result.buffer, selectedFile.name)
   } catch (error) {
     console.error(error)
     if (version === runVersion) showError(error?.message || String(error))
@@ -218,7 +218,7 @@ async function convertWithProfiles(engine, inputName, metadata, version) {
   }
 
   throw new Error(lastSize > 0
-    ? '完整视频即使使用最低画质仍超过 10MB，请缩短视频后重试'
+    ? '完整视频即使使用最低画质仍超过手机保存安全范围，请缩短视频后重试'
     : '无法生成 GIF')
 }
 
@@ -274,14 +274,16 @@ function readVideoMetadata(video) {
   })
 }
 
-function showResult(buffer, sourceName) {
+async function showResult(buffer, sourceName) {
   releaseResult()
   const blob = new Blob([buffer], { type: 'image/gif' })
   resultBlob = blob
   resultFilename = `${baseName(sourceName)}.gif`
   resultUrl = URL.createObjectURL(blob)
-  gifPreview.src = resultUrl
-  saveButton.href = resultUrl
+  gifPreview.src = await blobToGifDataUrl(blob)
+  // Keep the visible save target self-contained. Mobile and embedded browsers
+  // frequently cannot hand a page-owned blob: URL to the system image saver.
+  saveButton.href = gifPreview.src
   saveButton.download = resultFilename
   showPanel('done')
   releaseVideoPreview()

@@ -4,6 +4,28 @@ export function isEmbeddedMobileBrowser(userAgent = '') {
   return EMBEDDED_BROWSER_PATTERN.test(String(userAgent))
 }
 
+export function blobToGifDataUrl(blob, FileReaderClass = globalThis.FileReader) {
+  if (!blob || typeof FileReaderClass !== 'function') {
+    return Promise.reject(new Error('无法准备可保存的 GIF 图片'))
+  }
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReaderClass()
+    reader.addEventListener('load', () => {
+      const value = String(reader.result || '')
+      if (!value.startsWith('data:image/gif;base64,')) {
+        reject(new Error('GIF 图片数据无效'))
+        return
+      }
+      resolve(value)
+    }, { once: true })
+    reader.addEventListener('error', () => {
+      reject(reader.error || new Error('无法读取 GIF 图片'))
+    }, { once: true })
+    reader.readAsDataURL(blob)
+  })
+}
+
 export async function requestMobileGifSave({
   blob,
   filename = 'video.gif',

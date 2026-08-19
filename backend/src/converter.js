@@ -190,7 +190,7 @@ async function convertToGif({ inputPath, outputDir, config, onProgress = () => {
 
   throw new Error(
     lastResult
-      ? '完整视频即使使用最低画质仍超过 10MB，请缩短视频后重试'
+      ? '完整视频即使使用最低画质仍超过手机保存安全范围，请缩短视频后重试'
       : '无法生成 GIF，请更换视频后重试'
   )
 }

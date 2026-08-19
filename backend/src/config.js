@@ -36,7 +36,7 @@ module.exports = {
   ffmpegPath: process.env.FFMPEG_PATH || 'ffmpeg',
   ffprobePath: process.env.FFPROBE_PATH || 'ffprobe',
   maxUploadBytes: readPositiveNumber('MAX_UPLOAD_MB', 200) * 1024 * 1024,
-  maxOutputBytes: readPositiveNumber('MAX_OUTPUT_MB', 10) * 1024 * 1024,
+  maxOutputBytes: readPositiveNumber('MAX_OUTPUT_MB', 8) * 1024 * 1024,
   maxDurationSeconds: readPositiveNumber('MAX_DURATION_SECONDS', 30),
   maxConcurrentJobs: Math.max(1, Math.floor(readPositiveNumber('MAX_CONCURRENT_JOBS', 1))),
   maxPendingJobs: Math.max(1, Math.floor(readPositiveNumber('MAX_PENDING_JOBS', 8))),
